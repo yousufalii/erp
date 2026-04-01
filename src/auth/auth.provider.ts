@@ -45,6 +45,10 @@ export class AuthProvider {
     };
   }
 
+  async hashPassword(password: string): Promise<string> {
+    return this.authService.hashPassword(password);
+  }
+
   async login(payload: LoginDto) {
     const user = await this.userProvider.findOneByEmail(payload.email);
     BadRequestHandler({

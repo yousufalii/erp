@@ -151,6 +151,10 @@ To maintain architectural integrity, the following rules **MUST** be strictly fo
 12. **Mandatory Audit Columns**:
     - ❌ **DON'T** create entities without audit tracking.
     - ✅ **DO** ensure every entity extends `BaseTenantEntity`. This ensures `tenantId`, `createdBy`, `updatedBy`, `createdAt`, and `updatedAt` are automatically tracked via the global `AuditSubscriber`.
+13. **Heavy Swagger Documentation**: Every Controller and individual Endpoint MUST be documented using `@ApiTags`, `@ApiOperation`, `@ApiResponse`, and `@ApiBearerAuth` where applicable. DTOs must use `@ApiProperty` to define field types and examples.
+14. **No Emojis**: Do not use emojis anywhere in the codebase, comments, or documentation (including Swagger UI tags). Keep the tone professional and clean.
+15. **Avoid Comments**: Do not use comments for obvious code. Code should be self-documenting through clear naming and logic. Use comments ONLY when the logic is exceptionally complex and needs dedicated explanation or flagging.
+16. **Unified Response Structure**: Every API response (Success, Error, Validation, etc.) MUST follow the same base JSON structure: `{ success: boolean, message: string, data: any }`. This ensures predictability for API consumers.
 
 ---
 

@@ -14,9 +14,10 @@ import { RolesGuard } from '../lib/guards/roles.guard';
 import { PermissionsGuard } from '../lib/guards/permissions.guard';
 import { Roles } from '../lib/decorators/roles.decorator';
 import { UserRoles } from '../lib/enums/user.enum';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../lib/decorators/current-user.decorator';
 import { User } from '../user/entities/user.entity';
+import { SuccessResponseDto, ErrorResponseDto } from '../lib/dto/response.dto';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Settings - Roles')
 @ApiBearerAuth()
@@ -27,14 +28,17 @@ export class RoleController {
 
   @Post()
   @Roles(UserRoles.ADMIN)
-  @ApiOperation({ summary: 'Create a new dynamic role' })
+  @ApiOperation({ summary: 'Create a new dynamic role for the current tenant' })
+  @ApiResponse({ status: 201, type: SuccessResponseDto, description: 'Role successfully created.' })
+  @ApiResponse({ status: 400, type: ErrorResponseDto, description: 'Identity conflict or bad request.' })
   async createRole(@Body() payload: CreateRoleDto, @CurrentUser() user: User) {
     return this.userProvider.createRole(payload, user.tenantId);
   }
 
   @Get()
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
-  @ApiOperation({ summary: 'List all dynamic roles' })
+  @ApiOperation({ summary: 'List all dynamic roles in organization' })
+  @ApiResponse({ status: 200, isArray: true, description: 'List of roles.' })
   async findAll(@CurrentUser() user: User) {
     return this.userProvider.findAllRoles(user.tenantId);
   }

@@ -16,15 +16,31 @@ async function bootstrap() {
   
   app.enableCors();
 
-  // Swagger Documentation
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('HR ERP API (2026)')
-    .setDescription('The API documentation for the Human Resource Management system.')
-    .setVersion('1.0')
+    .setTitle('HR ERP - NextGen API (2026)')
+    .setDescription(
+      `### Enterprise Human Resource Management API
+      \n- **Multi-tenant Isolation**: Strict tenant-awareness using subdomains.
+      \n- **RBAC & Permissions**: Dynamic role-based access control.
+      \n- **Audit Logs**: Full lifecycle tracking of every record.
+      \n- **Global Standards**: Standardized responses and error handling.`,
+    )
+    .setVersion('1.2.0')
     .addBearerAuth()
+    .addTag('Organization Onboarding', 'Tenant registration and system bootstrapping')
+    .addTag('Authentication', 'Identity and access management')
+    .addTag('Settings - Roles', 'Dynamic Role and Permission management')
     .build();
+
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      filter: true,
+      displayRequestDuration: true,
+    },
+    customSiteTitle: 'HR ERP - API Documentation',
+  });
 
   const port = process.env.PORT ?? 5001;
   await app.listen(port);
