@@ -2,23 +2,44 @@ import {
   Controller, 
   Get, 
   Post, 
+  Patch,
+  Param,
+  Body,
   Query, 
   UseGuards 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AttendanceProvider } from './attendance.provider';
 import { JwtAuthGuard } from '../lib/guards/jwt-auth.guard';
+import { RolesGuard } from '../lib/guards/roles.guard';
+import { PermissionsGuard } from '../lib/guards/permissions.guard';
+import { Roles } from '../lib/decorators/roles.decorator';
+import { UserRoles } from '../lib/enums/user.enum';
 import { CurrentUser } from '../lib/decorators/current-user.decorator';
 import { User } from '../user/entities/user.entity';
 import { ResponseDto } from '../lib/dto/response.dto';
 import { Activity } from '../lib/decorators/activity.decorator';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 
 @ApiTags('Attendance Management')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly provider: AttendanceProvider) {}
+
+  @Patch(':id')
+  @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
+  @Activity({ action: 'OVERRIDE_ATTENDANCE', module: 'ATTENDANCE' })
+  @ApiOperation({ summary: 'Manual override of an attendance record (Admin/HR only)' })
+  @ApiResponse({ status: 200, type: ResponseDto, description: 'Attendance record manually corrected.' })
+  async update(
+    @Param('id') id: string,
+    @Body() payload: UpdateAttendanceDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.provider.update(id, payload, user.tenantId);
+  }
 
   @Post('check-in')
   @Activity({ action: 'CHECK_IN', module: 'ATTENDANCE' })

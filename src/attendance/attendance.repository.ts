@@ -30,6 +30,13 @@ export class AttendanceRepository {
     });
   }
 
+  async findById(id: string, tenantId: string): Promise<Attendance | null> {
+    return this.attendanceRepo.findOne({
+      where: { id, tenantId },
+      relations: ['employee'],
+    });
+  }
+
   async saveRecord(record: Partial<Attendance>): Promise<Attendance> {
     return this.attendanceRepo.save(record);
   }

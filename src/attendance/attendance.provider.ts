@@ -5,12 +5,42 @@ import { AttendanceStatus } from '../lib/enums/attendance.enum';
 import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandlers';
 import { Attendance } from './entities/attendance.entity';
 
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+
 @Injectable()
 export class AttendanceProvider {
   constructor(
     private readonly repository: AttendanceRepository,
     private readonly employeeProvider: EmployeeProvider,
   ) {}
+
+  async findOne(id: string, tenantId: string): Promise<Attendance> {
+    const record = await this.repository.findById(id, tenantId);
+    NotFoundHandler({ condition: !record, message: 'Attendance record not found.' });
+    return record!;
+  }
+
+  async update(id: string, payload: UpdateAttendanceDto, tenantId: string): Promise<Attendance> {
+    const record = await this.findOne(id, tenantId);
+    
+    let durationHours = record.totalHours;
+    if (payload.checkIn || payload.checkOut) {
+      const start = payload.checkIn ? new Date(payload.checkIn) : record.checkIn;
+      const end = payload.checkOut ? new Date(payload.checkOut) : record.checkOut;
+      if (start && end) {
+        durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      }
+    }
+
+    return this.repository.saveRecord({
+      id,
+      ...payload,
+      checkIn: payload.checkIn ? new Date(payload.checkIn) : undefined,
+      checkOut: payload.checkOut ? new Date(payload.checkOut) : undefined,
+      totalHours: Number(durationHours.toFixed(2)),
+      isManualOverride: true,
+    });
+  }
 
   async checkIn(userId: string, tenantId: string): Promise<Attendance> {
     const employee = await this.employeeProvider.findOneByUserId(userId, tenantId);

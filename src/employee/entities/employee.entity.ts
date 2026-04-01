@@ -49,6 +49,12 @@ export class Employee extends BaseTenantEntity {
   @Column({ nullable: true })
   department: string;
 
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  baseSalary: number;
+
+  @Column({ type: 'date', nullable: true })
+  probationEndDate: Date;
+
   // --- Bank Details ---
 
   @Column({ nullable: true })

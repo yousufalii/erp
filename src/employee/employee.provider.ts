@@ -20,6 +20,7 @@ export class EmployeeProvider {
       tenantId,
       joinDate: new Date(payload.joinDate),
       dateOfBirth: payload.dateOfBirth ? new Date(payload.dateOfBirth) : undefined,
+      probationEndDate: payload.probationEndDate ? new Date(payload.probationEndDate) : undefined,
     });
   }
 
@@ -48,6 +49,7 @@ export class EmployeeProvider {
       ...payload,
       joinDate: payload.joinDate ? new Date(payload.joinDate) : undefined,
       dateOfBirth: payload.dateOfBirth ? new Date(payload.dateOfBirth) : undefined,
+      probationEndDate: payload.probationEndDate ? new Date(payload.probationEndDate) : undefined,
     });
     return updated!;
   }

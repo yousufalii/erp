@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsEnum, IsOptional, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsEnum, IsOptional, IsDateString, IsUUID, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender, EmployeeStatus, EmploymentType } from '../../lib/enums/employee.enum';
 
@@ -59,6 +59,16 @@ export class CreateEmployeeDto {
   @IsString()
   @IsOptional()
   department?: string;
+
+  @ApiProperty({ example: 75000, required: false })
+  @IsNumber()
+  @IsOptional()
+  baseSalary?: number;
+
+  @ApiProperty({ example: '2024-07-01', required: false })
+  @IsDateString()
+  @IsOptional()
+  probationEndDate?: string;
 
   @ApiProperty({ example: 'IBAN1234567890' })
   @IsString()
