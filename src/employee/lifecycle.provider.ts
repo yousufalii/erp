@@ -59,12 +59,15 @@ export class LifecycleProvider {
 
   async finalizeExit(id: string, tenantId: string): Promise<Employee> {
     const employee = await this.employeeProvider.findOne(id, tenantId);
-    
-    // Status can only be 'RESIGNED' once exit is final
     const status = employee.status === EmployeeStatus.PENDING_RESIGNATION ? EmployeeStatus.RESIGNED : employee.status;
+    return this.employeeProvider.update(id, { status } as any, tenantId);
+  }
 
+  async recordExitInterview(id: string, tenantId: string, payload: { date: string; feedback: string }): Promise<Employee> {
+    await this.employeeProvider.findOne(id, tenantId);
     return this.employeeProvider.update(id, {
-       status,
+      exitInterviewDate: new Date(payload.date),
+      exitFeedback: payload.feedback,
     } as any, tenantId);
   }
 }

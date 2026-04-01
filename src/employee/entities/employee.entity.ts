@@ -64,6 +64,12 @@ export class Employee extends BaseTenantEntity {
   @Column({ type: 'date', nullable: true })
   lastWorkingDay: Date;
 
+  @Column({ type: 'date', nullable: true })
+  exitInterviewDate: Date;
+
+  @Column({ type: 'text', nullable: true })
+  exitFeedback: string;
+
   @Column({ nullable: true })
   exitReason: string;
 

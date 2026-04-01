@@ -59,4 +59,17 @@ export class LifecycleController {
   async finalize(@Param('id') id: string, @CurrentUser() user: User) {
     return this.provider.finalizeExit(id, user.tenantId);
   }
+
+  @Post('exit-interview/:id')
+  @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
+  @Activity({ action: 'RECORD_EXIT_INTERVIEW', module: 'HRM' })
+  @ApiOperation({ summary: 'Record feedback and date for the exit interview' })
+  @ApiResponse({ status: 200, type: ResponseDto })
+  async recordExit(
+    @Param('id') id: string, 
+    @Body() payload: { date: string, feedback: string }, 
+    @CurrentUser() user: User
+  ) {
+    return this.provider.recordExitInterview(id, user.tenantId, payload);
+  }
 }
