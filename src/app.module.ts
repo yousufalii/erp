@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './settings/setting.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ActivityLogModule } from './lib/activity-log/activity-log.module';
+import { EmployeeModule } from './employee/employee.module';
 import { LoggingInterceptor } from './lib/interceptor/logging.interceptor';
 import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
 
@@ -33,6 +34,7 @@ import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
     SettingModule,
     OnboardingModule,
     ActivityLogModule,
+    EmployeeModule,
   ],
   controllers: [],
   providers: [
