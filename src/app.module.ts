@@ -10,6 +10,7 @@ import { SettingModule } from './settings/setting.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ActivityLogModule } from './lib/activity-log/activity-log.module';
 import { EmployeeModule } from './employee/employee.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { LoggingInterceptor } from './lib/interceptor/logging.interceptor';
 import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
 
@@ -35,6 +36,7 @@ import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
     OnboardingModule,
     ActivityLogModule,
     EmployeeModule,
+    AttendanceModule,
   ],
   controllers: [],
   providers: [

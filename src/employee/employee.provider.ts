@@ -36,6 +36,10 @@ export class EmployeeProvider {
     return employee!;
   }
 
+  async findOneByUserId(userId: string, tenantId: string): Promise<Employee | null> {
+    return this.repository.findByUserId(userId, tenantId);
+  }
+
   async update(id: string, payload: Partial<CreateEmployeeDto>, tenantId: string): Promise<Employee> {
     const employee = await this.repository.findById(id, tenantId);
     NotFoundHandler({ condition: !employee, message: 'Employee not found.' });

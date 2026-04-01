@@ -29,6 +29,12 @@ export class EmployeeRepository {
     });
   }
 
+  async findByUserId(userId: string, tenantId: string): Promise<Employee | null> {
+    return this.repository.findOne({
+      where: { user: { id: userId }, tenantId },
+    });
+  }
+
   async findAll(tenantId: string): Promise<Employee[]> {
     return this.repository.find({
       where: { tenantId },

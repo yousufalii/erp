@@ -1,23 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SuccessResponseDto {
-  @ApiProperty({ example: true })
+export class ResponseDto {
+  @ApiProperty({ example: true, description: 'Indicating the success status of the operation' })
   success: boolean;
 
-  @ApiProperty({ example: 'Operation completed successfully.' })
+  @ApiProperty({ example: 'Action completed successfully.', description: 'Descriptive message of the operation' })
   message: string;
 
-  @ApiProperty({ required: false })
-  data?: any;
-}
-
-export class ErrorResponseDto {
-  @ApiProperty({ example: false })
-  success: boolean;
-
-  @ApiProperty({ example: 'Invalid request data.' })
-  message: string;
-
-  @ApiProperty({ required: false, example: 'null' })
+  @ApiProperty({ required: false, description: 'The payload of the response' })
   data: any;
 }

@@ -18,7 +18,7 @@ import { Roles } from '../lib/decorators/roles.decorator';
 import { UserRoles } from '../lib/enums/user.enum';
 import { CurrentUser } from '../lib/decorators/current-user.decorator';
 import { User } from '../user/entities/user.entity';
-import { SuccessResponseDto, ErrorResponseDto } from '../lib/dto/response.dto';
+import { ResponseDto } from '../lib/dto/response.dto';
 import { Activity } from '../lib/decorators/activity.decorator';
 
 @ApiTags('Employee Management')
@@ -32,8 +32,8 @@ export class EmployeeController {
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
   @Activity({ action: 'CREATE_EMPLOYEE', module: 'HRM' })
   @ApiOperation({ summary: 'Register a new employee' })
-  @ApiResponse({ status: 201, type: SuccessResponseDto, description: 'Employee successfully created.' })
-  @ApiResponse({ status: 400, type: ErrorResponseDto, description: 'Duplicate code or bad request.' })
+  @ApiResponse({ status: 201, type: ResponseDto, description: 'Employee successfully created.' })
+  @ApiResponse({ status: 400, type: ResponseDto, description: 'Duplicate code or bad request.' })
   async create(@Body() payload: CreateEmployeeDto, @CurrentUser() user: User) {
     return this.provider.create(payload, user.tenantId);
   }
@@ -41,7 +41,7 @@ export class EmployeeController {
   @Get()
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
   @ApiOperation({ summary: 'List all employees in the organization' })
-  @ApiResponse({ status: 200, type: SuccessResponseDto, isArray: true })
+  @ApiResponse({ status: 200, type: ResponseDto, isArray: true })
   async findAll(@CurrentUser() user: User) {
     return this.provider.findAll(user.tenantId);
   }
@@ -49,7 +49,7 @@ export class EmployeeController {
   @Get(':id')
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
   @ApiOperation({ summary: 'Get employee details by ID' })
-  @ApiResponse({ status: 200, type: SuccessResponseDto })
+  @ApiResponse({ status: 200, type: ResponseDto })
   async findOne(@Param('id') id: string, @CurrentUser() user: User) {
     return this.provider.findOne(id, user.tenantId);
   }
@@ -58,7 +58,7 @@ export class EmployeeController {
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
   @Activity({ action: 'UPDATE_EMPLOYEE', module: 'HRM' })
   @ApiOperation({ summary: 'Update employee profile sections' })
-  @ApiResponse({ status: 200, type: SuccessResponseDto })
+  @ApiResponse({ status: 200, type: ResponseDto })
   async update(
     @Param('id') id: string,
     @Body() payload: Partial<CreateEmployeeDto>,
@@ -71,7 +71,7 @@ export class EmployeeController {
   @Roles(UserRoles.ADMIN)
   @Activity({ action: 'DELETE_EMPLOYEE', module: 'HRM' })
   @ApiOperation({ summary: 'Soft delete an employee profile' })
-  @ApiResponse({ status: 200, type: SuccessResponseDto })
+  @ApiResponse({ status: 200, type: ResponseDto })
   async remove(@Param('id') id: string, @CurrentUser() user: User) {
     return this.provider.delete(id, user.tenantId);
   }
