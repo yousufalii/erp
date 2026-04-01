@@ -15,6 +15,8 @@ import { LeaveModule } from './leave/leave.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { NotificationModule } from './notification/notification.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { PerformanceModule } from './performance/performance.module';
+import { ExportModule } from './export/export.module';
 import { LoggingInterceptor } from './lib/interceptor/logging.interceptor';
 import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
 
@@ -45,6 +47,8 @@ import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
     PayrollModule,
     NotificationModule,
     DashboardModule,
+    PerformanceModule,
+    ExportModule,
   ],
   controllers: [],
   providers: [
