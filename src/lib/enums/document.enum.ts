@@ -1,0 +1,10 @@
+export enum DocumentType {
+  CNIC = 'CNIC',
+  PASSPORT = 'PASSPORT',
+  OFFER_LETTER = 'OFFER_LETTER',
+  CONTRACT = 'CONTRACT',
+  CERTIFICATE = 'CERTIFICATE',
+  DEGREE = 'DEGREE',
+  PHOTO = 'PHOTO',
+  OTHER = 'OTHER',
+}

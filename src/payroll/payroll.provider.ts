@@ -1,0 +1,84 @@
+import { Injectable } from '@nestjs/common';
+import { PayrollRepository } from './payroll.repository';
+import { EmployeeProvider } from '../employee/employee.provider';
+import { LeaveProvider } from '../leave/leave.provider';
+import { PayrollStatus } from '../lib/enums/payroll.enum';
+import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandlers';
+import { Payroll } from './entities/payroll.entity';
+import { CreateSalaryStructureDto, GeneratePayrollDto } from './dto/payroll.dto';
+import { SalaryStructure } from './entities/salary-structure.entity';
+
+@Injectable()
+export class PayrollProvider {
+  constructor(
+    private readonly repository: PayrollRepository,
+    private readonly employeeProvider: EmployeeProvider,
+    private readonly leaveProvider: LeaveProvider,
+  ) {}
+
+  async upsertSalaryStructure(payload: CreateSalaryStructureDto, tenantId: string): Promise<SalaryStructure> {
+    const employee = await this.employeeProvider.findOne(payload.employeeId, tenantId);
+    return this.repository.createStructure({
+      ...payload,
+      tenantId,
+    });
+  }
+
+  async generateMonthlyPayroll(payload: GeneratePayrollDto, tenantId: string): Promise<Payroll[]> {
+    const employees = await this.employeeProvider.findAll(tenantId);
+    const payrolls: Payroll[] = [];
+
+    for (const employee of employees) {
+      const structure = await this.repository.findStructure(employee.id, tenantId);
+      if (!structure) continue;
+
+      const unpaidDays = await this.leaveProvider.getMonthlyUnpaidLeaveDays(employee.id, payload.month, payload.year, tenantId);
+      
+      const grossSalary = Number(structure.basicSalary) + Number(structure.houseAllowance) + Number(structure.transportAllowance) + Number(structure.otherAllowances);
+      const perDaySalary = grossSalary / 30; // Standard month calculation
+      const lopDeduction = perDaySalary * unpaidDays;
+
+      const totalDeductions = Number(structure.taxDeduction) + Number(structure.providentFund) + Number(structure.otherDeductions) + lopDeduction;
+      const netSalary = grossSalary - totalDeductions;
+
+      // Check if duplicate exists, if so update, else create
+      const existing = await this.repository.findPayroll(employee.id, payload.month, payload.year, tenantId);
+      
+      const record = await this.repository.savePayroll({
+        id: existing?.id,
+        employeeId: employee.id,
+        tenantId,
+        month: payload.month,
+        year: payload.year,
+        grossSalary,
+        totalEarnings: grossSalary,
+        totalDeductions,
+        unpaidLeaves: unpaidDays,
+        lopDeduction: Number(lopDeduction.toFixed(2)),
+        netSalary: Number(netSalary.toFixed(2)),
+        status: PayrollStatus.DRAFT
+      });
+
+      payrolls.push(record);
+    }
+
+    return payrolls;
+  }
+
+  async finalizePayroll(month: number, year: number, tenantId: string): Promise<void> {
+    const records = await this.repository.findAllByMonth(month, year, tenantId);
+    for (const record of records) {
+      await this.repository.savePayroll({
+        id: record.id,
+        status: PayrollStatus.FINALIZED,
+        processedAt: new Date()
+      });
+    }
+  }
+
+  async getMyPayrolls(userId: string, tenantId: string): Promise<Payroll[]> {
+    const employee = await this.employeeProvider.findOneByUserId(userId, tenantId);
+    NotFoundHandler({ condition: !employee, message: 'Employee profile not associated.' });
+    return this.repository.findMyPayroll(employee!.id, tenantId);
+  }
+}

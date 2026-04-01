@@ -6,10 +6,12 @@ export enum Gender {
 
 export enum EmployeeStatus {
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
   PROBATION = 'PROBATION',
-  TERMINATED = 'TERMINATED',
+  PENDING_RESIGNATION = 'PENDING_RESIGNATION',
   RESIGNED = 'RESIGNED',
+  TERMINATED = 'TERMINATED',
+  ON_LEAVE = 'ON_LEAVE',
+  DECEASED = 'DECEASED',
 }
 
 export enum EmploymentType {

@@ -55,6 +55,18 @@ export class Employee extends BaseTenantEntity {
   @Column({ type: 'date', nullable: true })
   probationEndDate: Date;
 
+  @Column({ type: 'date', nullable: true })
+  resignationDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  terminationDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  lastWorkingDay: Date;
+
+  @Column({ nullable: true })
+  exitReason: string;
+
   // --- Bank Details ---
 
   @Column({ nullable: true })

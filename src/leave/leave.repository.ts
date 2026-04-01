@@ -67,4 +67,20 @@ export class LeaveRepository {
       order: { createdAt: 'DESC' }
     });
   }
+
+  async sumUnpaidLeaves(employeeId: string, month: number, year: number, tenantId: string): Promise<number> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const result = await this.requestRepo.createQueryBuilder('lr')
+      .select('SUM(lr.totalDays)', 'total')
+      .where('lr.employeeId = :employeeId', { employeeId })
+      .andWhere('lr.tenantId = :tenantId', { tenantId })
+      .andWhere('lr.leaveType = :type', { type: LeaveType.UNPAID })
+      .andWhere('lr.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('lr.startDate BETWEEN :start AND :end', { start: startDate, end: endDate })
+      .getRawOne();
+
+    return Number(result.total || 0);
+  }
 }

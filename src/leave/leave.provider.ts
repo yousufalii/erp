@@ -103,4 +103,8 @@ export class LeaveProvider {
     const employee = await this.employeeProvider.findOneByUserId(userId, tenantId);
     return this.repository.findRequestsForManager(employee!.id, tenantId);
   }
+
+  async getMonthlyUnpaidLeaveDays(employeeId: string, month: number, year: number, tenantId: string): Promise<number> {
+    return this.repository.sumUnpaidLeaves(employeeId, month, year, tenantId);
+  }
 }
