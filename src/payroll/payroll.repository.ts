@@ -42,6 +42,14 @@ export class PayrollRepository {
     return this.payrollRepo.save(payroll);
   }
 
+  async findById(id: string, tenantId: string): Promise<Payroll | null> {
+    return this.payrollRepo.findOne({ where: { id, tenantId } });
+  }
+
+  async updateStatus(id: string, status: any): Promise<any> {
+    return this.payrollRepo.update(id, { status });
+  }
+
   async findMyPayroll(employeeId: string, tenantId: string): Promise<Payroll[]> {
     return this.payrollRepo.find({
       where: { employeeId, tenantId },

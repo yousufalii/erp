@@ -7,7 +7,6 @@ import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandl
 import { Payroll } from './entities/payroll.entity';
 import { CreateSalaryStructureDto, GeneratePayrollDto } from './dto/payroll.dto';
 import { SalaryStructure } from './entities/salary-structure.entity';
-import { SalaryHistory } from './entities/salary-history.entity';
 
 @Injectable()
 export class PayrollProvider {
@@ -20,7 +19,6 @@ export class PayrollProvider {
   async upsertSalaryStructure(payload: CreateSalaryStructureDto, tenantId: string, actorUserId: string): Promise<SalaryStructure> {
     const existingStructure = await this.repository.findStructure(payload.employeeId, tenantId);
     
-    // Check for Salary Change to record History
     if (existingStructure && Number(existingStructure.basicSalary) !== Number(payload.basicSalary)) {
        await this.repository.saveHistory({
           employeeId: payload.employeeId,
@@ -50,13 +48,12 @@ export class PayrollProvider {
       const unpaidDays = await this.leaveProvider.getMonthlyUnpaidLeaveDays(employee.id, payload.month, payload.year, tenantId);
       
       const grossSalary = Number(structure.basicSalary) + Number(structure.houseAllowance) + Number(structure.transportAllowance) + Number(structure.otherAllowances);
-      const perDaySalary = grossSalary / 30; // Standard month calculation
+      const perDaySalary = grossSalary / 30;
       const lopDeduction = perDaySalary * unpaidDays;
 
       const totalDeductions = Number(structure.taxDeduction) + Number(structure.providentFund) + Number(structure.otherDeductions) + lopDeduction;
       const netSalary = grossSalary - totalDeductions;
 
-      // Check if duplicate exists, if so update, else create
       const existing = await this.repository.findPayroll(employee.id, payload.month, payload.year, tenantId);
       
       const record = await this.repository.savePayroll({
@@ -80,15 +77,32 @@ export class PayrollProvider {
     return payrolls;
   }
 
-  async finalizePayroll(month: number, year: number, tenantId: string): Promise<void> {
-    const records = await this.repository.findAllByMonth(month, year, tenantId);
-    for (const record of records) {
-      await this.repository.savePayroll({
-        id: record.id,
-        status: PayrollStatus.FINALIZED,
-        processedAt: new Date()
-      });
-    }
+  async finalizePayroll(id: string, tenantId: string): Promise<Payroll> {
+    const payroll = await this.repository.findById(id, tenantId);
+    BadRequestHandler({ condition: !payroll, message: 'Payroll record not found.' });
+
+    return this.repository.updateStatus(id, PayrollStatus.FINALIZED);
+  }
+
+  async getPayslip(id: string, tenantId: string) {
+    const payroll = await this.repository.findById(id, tenantId);
+    NotFoundHandler({ condition: !payroll, message: 'Payroll record not found.' });
+    
+    return {
+      success: true,
+      message: 'Payslip data generated.',
+      data: {
+        summary: payroll!,
+        breakdown: {
+          gross: payroll!.grossSalary,
+          deductions: {
+            unpaidLeaves: payroll!.lopDeduction,
+            tax: 0,
+          },
+          net: payroll!.netSalary,
+        }
+      }
+    };
   }
 
   async getMyPayrolls(userId: string, tenantId: string): Promise<Payroll[]> {

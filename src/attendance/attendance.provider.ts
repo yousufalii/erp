@@ -4,7 +4,7 @@ import { EmployeeProvider } from '../employee/employee.provider';
 import { AttendanceStatus } from '../lib/enums/attendance.enum';
 import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandlers';
 import { Attendance } from './entities/attendance.entity';
-
+import { CreateAttendancePolicyDto } from './dto/attendance-policy.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 
 @Injectable()
@@ -13,6 +13,20 @@ export class AttendanceProvider {
     private readonly repository: AttendanceRepository,
     private readonly employeeProvider: EmployeeProvider,
   ) {}
+
+  async upsertPolicy(payload: CreateAttendancePolicyDto, tenantId: string) {
+    return this.repository.savePolicy({
+      ...payload,
+      tenantId,
+      isActive: true,
+    });
+  }
+
+  async getPolicy(tenantId: string) {
+    const policy = await this.repository.findActivePolicy(tenantId);
+    NotFoundHandler({ condition: !policy, message: 'No active attendance policy defined for your organization.' });
+    return policy;
+  }
 
   async findOne(id: string, tenantId: string): Promise<Attendance> {
     const record = await this.repository.findById(id, tenantId);

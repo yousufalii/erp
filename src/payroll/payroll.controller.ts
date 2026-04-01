@@ -44,14 +44,21 @@ export class PayrollController {
     return this.provider.generateMonthlyPayroll(payload, user.tenantId);
   }
 
-  @Post('finalize')
+  @Post('finalize/:id')
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
   @Activity({ action: 'FINALIZE_PAYROLL', module: 'PAYROLL' })
-  @ApiOperation({ summary: 'Lock monthly payroll records to prevent further edits' })
-  @ApiResponse({ status: 200, type: ResponseDto, description: 'Records finalized.' })
-  async finalize(@Body() payload: GeneratePayrollDto, @CurrentUser() user: User) {
-    await this.provider.finalizePayroll(payload.month, payload.year, user.tenantId);
-    return { success: true, message: 'Payroll finalized successfully.' };
+  @ApiOperation({ summary: 'Lock a payroll record after verification' })
+  @ApiResponse({ status: 200, type: ResponseDto })
+  async finalize(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.provider.finalizePayroll(id, user.tenantId);
+  }
+
+  @Get('payslip/:id')
+  @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER, UserRoles.EMPLOYEE)
+  @ApiOperation({ summary: 'Get detailed breakdown for PDF payslip rendering' })
+  @ApiResponse({ status: 200, type: ResponseDto })
+  async getPayslip(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.provider.getPayslip(id, user.tenantId);
   }
 
   @Get('my-payslips')

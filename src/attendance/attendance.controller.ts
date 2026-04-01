@@ -20,13 +20,31 @@ import { User } from '../user/entities/user.entity';
 import { ResponseDto } from '../lib/dto/response.dto';
 import { Activity } from '../lib/decorators/activity.decorator';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { CreateAttendancePolicyDto } from './dto/attendance-policy.dto';
 
-@ApiTags('Attendance Management')
+@ApiTags('Attendance')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly provider: AttendanceProvider) {}
+
+  @Post('policy')
+  @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)
+  @Activity({ action: 'SET_ATTENDANCE_POLICY', module: 'ATTENDANCE' })
+  @ApiOperation({ summary: 'Define or update organizational attendance rules (Shifts, Off-days)' })
+  @ApiResponse({ status: 201, type: ResponseDto })
+  async setPolicy(@Body() payload: CreateAttendancePolicyDto, @CurrentUser() user: User) {
+    return this.provider.upsertPolicy(payload, user.tenantId);
+  }
+
+  @Get('policy')
+  @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER, UserRoles.EMPLOYEE)
+  @ApiOperation({ summary: 'Get currently active attendance rules' })
+  @ApiResponse({ status: 200, type: ResponseDto })
+  async getPolicy(@CurrentUser() user: User) {
+    return this.provider.getPolicy(user.tenantId);
+  }
 
   @Patch(':id')
   @Roles(UserRoles.ADMIN, UserRoles.HR_MANAGER)

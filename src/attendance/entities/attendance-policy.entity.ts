@@ -15,6 +15,12 @@ export class AttendancePolicy extends BaseTenantEntity {
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 4.5 })
   halfDayThreshold: number; // Minimum hours for full day credit
 
+  @Column({ type: 'int', default: 30 })
+  halfDayLateThresholdMinutes: number;
+
+  @Column({ type: 'simple-array', nullable: true })
+  weeklyOffDays: string[]; // e.g. ['Saturday', 'Sunday']
+
   @Column({ default: true })
   isActive: boolean;
 }

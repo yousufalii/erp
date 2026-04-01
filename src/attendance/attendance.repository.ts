@@ -19,6 +19,11 @@ export class AttendanceRepository {
     });
   }
 
+  async savePolicy(data: Partial<AttendancePolicy>): Promise<AttendancePolicy> {
+    const policy = this.policyRepo.create(data);
+    return this.policyRepo.save(policy);
+  }
+
   async upsertPolicy(data: Partial<AttendancePolicy>): Promise<AttendancePolicy> {
     const policy = this.policyRepo.create(data);
     return this.policyRepo.save(policy);
