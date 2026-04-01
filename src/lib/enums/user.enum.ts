@@ -1,0 +1,13 @@
+export enum UserRoles {
+  ADMIN = 'ADMIN',
+  HR_MANAGER = 'HR_MANAGER',
+  DEPARTMENT_MANAGER = 'DEPARTMENT_MANAGER',
+  EMPLOYEE = 'EMPLOYEE',
+}
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  PENDING = 'PENDING',
+  DELETED = 'DELETED',
+}

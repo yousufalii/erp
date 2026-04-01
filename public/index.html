@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 2rem;
+    }
+    .hidden {
+      display: none;
+    }
+    #chat {
+      display: flex;
+      gap: 2rem;
+    }
+    #conversations, #messages {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #fff;
+      padding: 1rem;
+      height: 80vh;
+      overflow-y: auto;
+    }
+    #conversations {
+      flex: 1;
+    }
+    #messages {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    .conversation, .friend {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .conversation:hover, .friend:hover {
+      background: #f0f0f0;
+    }
+    .message {
+      margin-bottom: 1rem;
+    }
+    .message.me {
+      text-align: right;
+    }
+    .message-content {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    .message.me .message-content {
+      background: #2563eb;
+      color: #fff;
+    }
+    #input-area {
+      margin-top: auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+    #message-input {
+      flex: 1;
+      padding: 0.5rem;
+    }
+    #send-button {
+      padding: 0.5rem 1rem;
+    }
+    .login-form {
+      max-width: 400px;
+      margin: 4rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .login-form input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .login-form button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+    .profile-img {
+      width: 30px;
+      height: 30px;
+      border-radius: 9999px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="login-container" class="login-form">
+      <h2>Login</h2>
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <div id="chat" class="hidden">
+      <div>
+        <h3>Friends</h3>
+        <div id="friends"></div>
+        <h3>Conversations</h3>
+        <div id="conversations"></div>
+      </div>
+      <div id="messages">
+        <h3 id="chat-title">Messages</h3>
+        <div id="message-list"></div>
+        <div id="input-area">
+          <input id="message-input" placeholder="Type a message" />
+          <button id="send-button" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:5001/api';
+    let accessToken = localStorage.getItem('accessToken');
+    let currentUserId = localStorage.getItem('currentUserId');
+    let selectedConversationId = null;
+
+    if (accessToken && currentUserId) initChat();
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.status && data.data?.accessToken) {
+            accessToken = data.data.accessToken;
+            currentUserId = data.data.id;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('currentUserId', currentUserId);
+            initChat();
+          } else {
+            alert('Login failed');
+          }
+        });
+    }
+
+    function initChat() {
+      document.getElementById('login-container').classList.add('hidden');
+      document.getElementById('chat').classList.remove('hidden');
+      loadFriends();
+      loadConversations();
+    }
+
+    function loadFriends() {
+      fetch(`${BASE_URL}/user/${currentUserId}/friends`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('friends');
+          container.innerHTML = '';
+          data.data.rows.forEach(item => {
+            const f = item.friend;
+            const el = document.createElement('div');
+            el.className = 'friend';
+            el.textContent = `${f.firstName || ''} ${f.lastName || ''}`;
+            el.onclick = () => startConversation([f.id]);
+            container.appendChild(el);
+          });
+        });
+    }
+
+    function loadConversations() {
+      fetch(`${BASE_URL}/Chat/conversations`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('conversations');
+          container.innerHTML = '';
+          data.data.forEach(conv => {
+            const other = conv.participants.find(p => p.id !== currentUserId);
+            const el = document.createElement('div');
+            el.className = 'conversation';
+            el.textContent = `${other?.firstName || ''} ${other?.lastName || ''}`;
+            el.onclick = () => openConversation(conv.id, el.textContent);
+            container.appendChild(el);
+          });
+        });
+    }
+
+    function openConversation(id, name) {
+      selectedConversationId = id;
+      document.getElementById('chat-title').textContent = name;
+      fetch(`${BASE_URL}/Chat/conversations/${id}/messages`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('message-list');
+          container.innerHTML = '';
+          data.data.rows.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = 'message' + (msg.sender.id === currentUserId ? ' me' : '');
+            div.innerHTML = `<div class="message-content">${msg.content}</div>`;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    function sendMessage() {
+      const content = document.getElementById('message-input').value;
+      if (!content || !selectedConversationId) return;
+      fetch(`${BASE_URL}/Chat/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ conversationId: selectedConversationId, content })
+      }).then(() => {
+        document.getElementById('message-input').value = '';
+        openConversation(selectedConversationId, document.getElementById('chat-title').textContent);
+      });
+    }
+  </script>
+</body>
+</html>
