@@ -14,6 +14,6 @@ import { EmployeeModule } from '../employee/employee.module';
   ],
   controllers: [AttendanceController],
   providers: [AttendanceRepository, AttendanceProvider],
-  exports: [AttendanceProvider],
+  exports: [AttendanceProvider, AttendanceRepository],
 })
 export class AttendanceModule {}

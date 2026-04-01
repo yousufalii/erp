@@ -107,4 +107,8 @@ export class LeaveProvider {
   async getMonthlyUnpaidLeaveDays(employeeId: string, month: number, year: number, tenantId: string): Promise<number> {
     return this.repository.sumUnpaidLeaves(employeeId, month, year, tenantId);
   }
+
+  async getPendingCount(tenantId: string): Promise<number> {
+    return this.repository.countPending(tenantId);
+  }
 }

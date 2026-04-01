@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
+import { EmployeeStatus } from '../lib/enums/employee.enum';
 
 @Injectable()
 export class EmployeeRepository {
@@ -49,5 +50,13 @@ export class EmployeeRepository {
 
   async softDelete(id: string, tenantId: string): Promise<void> {
     await this.repository.softDelete({ id, tenantId });
+  }
+
+  async countAll(tenantId: string): Promise<number> {
+    return this.repository.count({ where: { tenantId, status: EmployeeStatus.ACTIVE } });
+  }
+
+  async countByStatus(status: EmployeeStatus, tenantId: string): Promise<number> {
+    return this.repository.count({ where: { tenantId, status } });
   }
 }

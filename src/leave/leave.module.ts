@@ -14,6 +14,6 @@ import { EmployeeModule } from '../employee/employee.module';
   ],
   controllers: [LeaveController],
   providers: [LeaveRepository, LeaveProvider],
-  exports: [LeaveProvider],
+  exports: [LeaveProvider, LeaveRepository],
 })
 export class LeaveModule {}

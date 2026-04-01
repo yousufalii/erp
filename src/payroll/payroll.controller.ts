@@ -32,7 +32,7 @@ export class PayrollController {
   @ApiOperation({ summary: 'Define or update an employee salary structure' })
   @ApiResponse({ status: 201, type: ResponseDto, description: 'Structure saved.' })
   async upsertStructure(@Body() payload: CreateSalaryStructureDto, @CurrentUser() user: User) {
-    return this.provider.upsertSalaryStructure(payload, user.tenantId);
+    return this.provider.upsertSalaryStructure(payload, user.tenantId, user.id);
   }
 
   @Post('generate')

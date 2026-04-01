@@ -68,6 +68,10 @@ export class LeaveRepository {
     });
   }
 
+  async countPending(tenantId: string): Promise<number> {
+    return this.requestRepo.count({ where: { tenantId, status: LeaveStatus.PENDING } });
+  }
+
   async sumUnpaidLeaves(employeeId: string, month: number, year: number, tenantId: string): Promise<number> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);

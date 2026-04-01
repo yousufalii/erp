@@ -3,6 +3,7 @@ import { EmployeeRepository } from './employee.repository';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandlers';
 import { Employee } from './entities/employee.entity';
+import { EmployeeStatus } from '../lib/enums/employee.enum';
 
 @Injectable()
 export class EmployeeProvider {
@@ -52,6 +53,12 @@ export class EmployeeProvider {
       probationEndDate: payload.probationEndDate ? new Date(payload.probationEndDate) : undefined,
     });
     return updated!;
+  }
+
+  async getHeadcountStats(tenantId: string) {
+    const totalActive = await this.repository.countAll(tenantId);
+    const inProbation = await this.repository.countByStatus(EmployeeStatus.PROBATION, tenantId);
+    return { totalActive, inProbation };
   }
 
   async delete(id: string, tenantId: string): Promise<void> {

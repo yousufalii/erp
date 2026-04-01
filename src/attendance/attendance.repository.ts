@@ -41,6 +41,14 @@ export class AttendanceRepository {
     return this.attendanceRepo.save(record);
   }
 
+  async countTodayByStatus(status: any, tenantId: string): Promise<number> {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return this.attendanceRepo.count({
+      where: { tenantId, status, date: today }
+    });
+  }
+
   async findLogs(employeeId: string, tenantId: string, startDate: Date, endDate: Date): Promise<Attendance[]> {
     return this.attendanceRepo.find({
       where: { 

@@ -7,6 +7,7 @@ import { BadRequestHandler, NotFoundHandler } from '../lib/helpers/responseHandl
 import { Payroll } from './entities/payroll.entity';
 import { CreateSalaryStructureDto, GeneratePayrollDto } from './dto/payroll.dto';
 import { SalaryStructure } from './entities/salary-structure.entity';
+import { SalaryHistory } from './entities/salary-history.entity';
 
 @Injectable()
 export class PayrollProvider {
@@ -16,8 +17,22 @@ export class PayrollProvider {
     private readonly leaveProvider: LeaveProvider,
   ) {}
 
-  async upsertSalaryStructure(payload: CreateSalaryStructureDto, tenantId: string): Promise<SalaryStructure> {
-    const employee = await this.employeeProvider.findOne(payload.employeeId, tenantId);
+  async upsertSalaryStructure(payload: CreateSalaryStructureDto, tenantId: string, actorUserId: string): Promise<SalaryStructure> {
+    const existingStructure = await this.repository.findStructure(payload.employeeId, tenantId);
+    
+    // Check for Salary Change to record History
+    if (existingStructure && Number(existingStructure.basicSalary) !== Number(payload.basicSalary)) {
+       await this.repository.saveHistory({
+          employeeId: payload.employeeId,
+          tenantId,
+          oldBasicSalary: existingStructure.basicSalary,
+          newBasicSalary: payload.basicSalary,
+          effectiveDate: new Date(),
+          changedById: actorUserId,
+          reason: 'Manual adjustment in salary structure'
+       });
+    }
+
     return this.repository.createStructure({
       ...payload,
       tenantId,

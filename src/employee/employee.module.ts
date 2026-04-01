@@ -22,6 +22,6 @@ import { DocumentController } from './document.controller';
     LifecycleProvider, 
     DocumentProvider
   ],
-  exports: [EmployeeProvider],
+  exports: [EmployeeProvider, EmployeeRepository],
 })
 export class EmployeeModule {}

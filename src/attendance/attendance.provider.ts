@@ -111,4 +111,10 @@ export class AttendanceProvider {
     const endDate = new Date(year, month, 0);
     return this.repository.findLogs(employee!.id, tenantId, startDate, endDate);
   }
+
+  async getTodayStats(tenantId: string) {
+    const presentCount = await this.repository.countTodayByStatus(AttendanceStatus.PRESENT, tenantId);
+    const lateCount = await this.repository.countTodayByStatus(AttendanceStatus.LATE, tenantId);
+    return { presentToday: presentCount, lateToday: lateCount };
+  }
 }

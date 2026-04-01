@@ -14,6 +14,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { LeaveModule } from './leave/leave.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { NotificationModule } from './notification/notification.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { LoggingInterceptor } from './lib/interceptor/logging.interceptor';
 import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
 
@@ -43,6 +44,7 @@ import { TenantInterceptor } from './lib/interceptor/tenant.interceptor';
     LeaveModule,
     PayrollModule,
     NotificationModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [
